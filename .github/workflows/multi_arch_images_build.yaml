@@ -24,7 +24,7 @@ jobs:
       - name: Install latest buildah
         if: matrix.install_latest
         run: |
-          bash buildah-build/.github/install_latest_buildah.sh
+          bash multiarch-image/.github/install_latest_buildah.sh
  
       - name: Install qemu dependency
         run: |
