@@ -2,22 +2,43 @@
 name: 'multi-arch images build'
  
 on: push
+
+env:
+  IMAGE_TAG: latest
  
 jobs:
   multiarch-build:
+    env:
+      IMAGE_NAME: hello-world-multiarch
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [ amd64, ppc64le ]
+        install_latest: [ true, false ]
+
     steps:
       - name: add checkout action...
         uses: actions/checkout@v2
+        
+      - name: Install latest buildah
+        if: matrix.install_latest
+        run: |
+          bash multiarch-image/.github/install_latest_buildah.sh
  
-      - name: configure QEMU action...
-        uses: docker/setup-qemu-action@master
-        with:
-          platforms: all
+      - name: Install qemu dependency
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-user-static
  
-      - name: configure Docker Buildx...
-        id: docker_buildx
-        uses: docker/setup-buildx-action@master
+      - name: Create Containerfile
+        run: |
+          cat > Containerfile<<EOF
+          FROM ubuntu:20.04
+          CMD echo "Hello World from a container running on $(uname -m);"
+          EOF
+ 
+
  
       - name: login to Quay.io...
         if: github.event_name != 'pull_request'
@@ -27,12 +48,19 @@ jobs:
           username: ${{ secrets.QUAY_USER }}
           password: ${{ secrets.QUAY_PWD }}
  
-      - name: build Multi-arch images...
-        uses: docker/build-push-action@v2
+      - name: Build Image
+        id: build_image_multiarch
+        uses: ./buildah-build/
         with:
-          builder: ${{ steps.docker_buildx.outputs.name }}
-          context: .
-          file: ./Dockerfile
-          platforms: linux/amd64,linux/ppc64le
-          push: true
-          tags: quay.io/mayurwaghmode111/multiarch-image
+          image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.IMAGE_TAG }}
+          arch: ${{ matrix.arch }}
+          build-args: ARCH=${{ matrix.arch }}
+          containerfiles: |
+            ./Containerfile
+            
+      - name: Echo Outputs
+        run: |
+          echo "Image: ${{ steps.build_image_multiarch.outputs.image }}"
+          echo "Tags: ${{ steps.build_image_multiarch.outputs.tags }}"
+          echo "Tagged Image: ${{ steps.build_image_multiarch.outputs.image-with-tag }}"
