@@ -20,7 +20,8 @@ jobs:
     steps:
       - name: add checkout action...
         uses: actions/checkout@v2
-        
+        with:
+          path: "multiarch-image"
       - name: Install latest buildah
         if: matrix.install_latest
         run: |
