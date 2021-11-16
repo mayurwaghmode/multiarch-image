@@ -10,18 +10,27 @@ jobs:
   multiarch-build:
     env:
       IMAGE_NAME: hello-world-multiarch
+      IMAGE_REGISTRY: quay.io
+      IMAGE_NAMESPACE: mayurwaghmode111
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         arch: [ amd64, ppc64le ]
         install_latest: [ true, false ]
+        
 
     steps:
       - name: add checkout action...
         uses: actions/checkout@v2
         with:
           path: "multiarch-image"
+          
+      - name: Install latest podman
+        if: matrix.install_latest
+        run: |
+          bash multiarch-image/.github/install_latest_podman.sh
+     
       - name: Install latest buildah
         if: matrix.install_latest
         run: |
@@ -53,15 +62,19 @@ jobs:
           push: true
           tags: quay.io/mayurwaghmode111/multiarch-image
           
-      - name: Push To quay.io
-        id: push-to-quay
-        uses: multiarch-image/push-to-registry@v2
+          
+      - name: Push To Quay
+        uses: ./
+        id: push
         with:
-          image: ${{ steps.build_image_multiarch.outputs.image }}
+          image: ${{ steps.build_image.outputs.image }}
           tags: latest
-          registry: quay.io/mayurwaghmode111
+          registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username:  ${{ secrets.QUAY_USER }}
           password: ${{ secrets.QUAY_PWD }}
-
-      - name: Print image url
-        run: echo "Image pushed to ${{ steps.push-to-quay.outputs.registry-paths }}"
+          extra-args: |
+            --disable-content-trust
+      - name: Echo outputs
+        run: |
+          echo "${{ toJSON(steps.push.outputs) }}"
+          
