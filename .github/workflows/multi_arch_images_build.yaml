@@ -3,20 +3,19 @@ name: 'multi-arch images build'
  
 on: push
 
-env:
-  IMAGE_TAG: latest
- 
+  
 jobs:
   multiarch-build:
     env:
       IMAGE_NAME: hello-world-multiarch
       IMAGE_REGISTRY: quay.io
       IMAGE_NAMESPACE: mayurwaghmode111
+      IMAGE_TAG: latest
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        arch: [ amd64, ppc64le ]
+        platform: [ "linux/amd64", "linux/ppc64le" ]
         install_latest: [ true, false ]
         
 
@@ -55,8 +54,7 @@ jobs:
         with:
           image: ${{ env.IMAGE_NAME }}
           tags: ${{ env.IMAGE_TAGS }}
-          arch: ${{ matrix.arch }}
-          build-args: ARCH=${{ matrix.arch }}
+          platform: ${{ matrix.platform }}
           containerfiles: |
             ./Containerfile
           
@@ -66,7 +64,7 @@ jobs:
         id: push
         with:
           image: ${{ steps.build_image_multiarch.outputs.image }}
-          tags: quay.io/mayurwaghmode111/multiarch-image
+          tags: ${{ env.IMAGE_TAG }}
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username:  ${{ secrets.QUAY_USER }}
           password: ${{ secrets.QUAY_PWD }}
