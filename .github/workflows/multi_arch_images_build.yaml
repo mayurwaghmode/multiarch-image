@@ -2,15 +2,15 @@
 name: 'multi-arch images build'
  
 on: push
-
-  
-jobs:
-  multiarch-build:
-    env:
+env:
       IMAGE_NAME: hello-world-multiarch
       IMAGE_REGISTRY: quay.io
       IMAGE_NAMESPACE: mayurwaghmode111
       IMAGE_TAG: latest
+  
+jobs:
+  multiarch-build:
+    
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
