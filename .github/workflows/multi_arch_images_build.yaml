@@ -49,7 +49,7 @@ jobs:
  
       - name: Build Image
         id: build_image_multiarch
-        uses: ./multiarch-image/build-push-action@v2
+        uses: ./multiarch-image
         with:
           image: ${{ env.IMAGE_NAME }}
           arch: ${{ matrix.arch }}
