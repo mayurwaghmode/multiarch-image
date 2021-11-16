@@ -68,12 +68,13 @@ jobs:
         id: push
         with:
           image: ${{ steps.build_image.outputs.image }}
-          tags: latest
+          tags: quay.io/mayurwaghmode111/multiarch-image
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username:  ${{ secrets.QUAY_USER }}
           password: ${{ secrets.QUAY_PWD }}
           extra-args: |
             --disable-content-trust
+            
       - name: Echo outputs
         run: |
           echo "${{ toJSON(steps.push.outputs) }}"
