@@ -39,8 +39,6 @@ jobs:
           CMD echo "Hello World from a container running on $(uname -m);"
           EOF
  
-
- 
       - name: login to Quay.io...
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v1
@@ -54,14 +52,10 @@ jobs:
         uses: ./multiarch-image/
         with:
           image: ${{ env.IMAGE_NAME }}
-          tags: ${{ env.IMAGE_TAG }}
           arch: ${{ matrix.arch }}
           build-args: ARCH=${{ matrix.arch }}
           containerfiles: |
             ./Containerfile
-            
-      - name: Echo Outputs
-        run: |
-          echo "Image: ${{ steps.build_image_multiarch.outputs.image }}"
-          echo "Tags: ${{ steps.build_image_multiarch.outputs.tags }}"
-          echo "Tagged Image: ${{ steps.build_image_multiarch.outputs.image-with-tag }}"
+          platforms: linux/amd64,linux/ppc64le
+          push: true
+          tags: quay.io/mayurwaghmode111/multiarch-image
