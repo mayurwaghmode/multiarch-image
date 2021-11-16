@@ -54,20 +54,18 @@ jobs:
         uses: ./multiarch-image
         with:
           image: ${{ env.IMAGE_NAME }}
+          tags: ${{ env.IMAGE_TAGS }}
           arch: ${{ matrix.arch }}
           build-args: ARCH=${{ matrix.arch }}
           containerfiles: |
             ./Containerfile
-          platforms: linux/amd64,linux/ppc64le
-          push: true
-          tags: quay.io/mayurwaghmode111/multiarch-image
           
           
       - name: Push To Quay
         uses: ./multiarch-image
         id: push
         with:
-          image: ${{ steps.build_image.outputs.image }}
+          image: ${{ steps.build_image_multiarch.outputs.image }}
           tags: quay.io/mayurwaghmode111/multiarch-image
           registry: ${{ env.IMAGE_REGISTRY }}/${{ env.IMAGE_NAMESPACE }}
           username:  ${{ secrets.QUAY_USER }}
