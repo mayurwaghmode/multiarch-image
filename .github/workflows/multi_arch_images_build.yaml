@@ -57,6 +57,12 @@ jobs:
           platform: ${{ matrix.platform }}
           containerfiles: |
             ./Containerfile
+
+      - name: Echo Outputs
+        run: |
+          echo "Image: ${{ steps.build_image_multiarch.outputs.image }}"
+          echo "Tags: ${{ steps.build_image_multiarch.outputs.tags }}"
+          echo "Tagged Image: ${{ steps.build_image_multiarch.outputs.image-with-tag }}"
           
           
       - name: Push To Quay
