@@ -64,7 +64,7 @@ jobs:
           
           
       - name: Push To Quay
-        uses: ./
+        uses: ./multiarch-image
         id: push
         with:
           image: ${{ steps.build_image.outputs.image }}
